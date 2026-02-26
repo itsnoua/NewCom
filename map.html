@@ -1,0 +1,86 @@
+<!doctype html>
+<html lang="ar" dir="rtl">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>(★‿★)</title>
+  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" crossorigin=""/>
+  <style>
+    html,body,#map{height:100%;margin:0;padding:0}
+    #map{height:100vh}
+    .legend{background:#fff;padding:6px;border-radius:4px;box-shadow:0 0 6px rgba(0,0,0,0.2)}
+  </style>
+</head>
+<body>
+  <div id="map"></div>
+
+  <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" crossorigin=""></script>
+  <script>
+    const map = L.map('map').setView([0, 0], 2);
+
+    const osm = L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+      maxZoom: 19,
+      attribution: '© OpenStreetMap'
+    }).addTo(map);
+
+    const pointsLayer = L.geoJSON(null, {
+      pointToLayer: (feature, latlng) => {
+        return L.circleMarker(latlng, {
+          radius: 6,
+          fillColor: '#1f78b4',
+          color: '#fff',
+          weight: 1,
+          fillOpacity: 0.9
+        });
+      },
+      onEachFeature: (feature, layer) => {
+        const props = feature.properties || {};
+        const entries = Object.keys(props).map(k => `<strong>${k}</strong>: ${props[k]}`).join('<br/>');
+        layer.bindPopup(entries || 'نقطة');
+      }
+    });
+
+    const buildLayer = L.geoJSON(null, {
+      style: {
+        color: '#000',
+        weight: 1,
+        fillColor: '#ff7800',
+        fillOpacity: 0.6
+      },
+      onEachFeature: (feature, layer) => {
+        const props = feature.properties || {};
+        const entries = Object.keys(props).map(k => `<strong>${k}</strong>: ${props[k]}`).join('<br/>');
+        layer.bindPopup(entries || 'مبنى');
+      }
+    });
+
+    // Simple all-or-nothing load (original working version)
+    Promise.all([
+      fetch('Comapoints.geojson').then(r => r.ok ? r.json() : Promise.reject(r)),
+      fetch('ComBulid.geojson').then(r => r.ok ? r.json() : Promise.reject(r))
+    ]).then(([pointsData, buildsData]) => {
+      pointsLayer.addData(pointsData);
+      buildLayer.addData(buildsData);
+
+      // Add both layers to the map so the user sees them
+      pointsLayer.addTo(map);
+      buildLayer.addTo(map);
+
+      // Fit to combined bounds
+      const group = L.featureGroup([pointsLayer, buildLayer]);
+      if (group.getBounds().isValid()) {
+        map.fitBounds(group.getBounds(), { padding: [20, 20] });
+      }
+
+      const overlays = {
+        'نقاط': pointsLayer,
+        'مباني': buildLayer
+      };
+      L.control.layers({ 'OpenStreetMap': osm }, overlays, { collapsed: false, position: 'topright' }).addTo(map);
+    }).catch(err => {
+      console.error('Error loading GeoJSON files:', err);
+      alert('هناك مشكلة في تحميل ملفات GeoJSON — راجع وحدة تحكم المطور في المتصفح.');
+    });
+  </script>
+</body>
+</html>
