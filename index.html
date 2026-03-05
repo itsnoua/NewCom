@@ -4,7 +4,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>لوحة بيانات امتثال أبها</title>
+    <title>O_O</title>
     <!-- MapLibre GL JS -->
     <script src="https://unpkg.com/maplibre-gl@3.6.2/dist/maplibre-gl.js"></script>
     <link href="https://unpkg.com/maplibre-gl@3.6.2/dist/maplibre-gl.css" rel="stylesheet" />
@@ -21,12 +21,6 @@
     <div class="sidebar glass">
         <!-- Search / Select Dropdown directly at the top -->
         <div class="search-container">
-            <label for="streetSelect" class="input-label">الشارع <span class="badge-dev">(قيد التطوير)</span></label>
-            <select id="streetSelect" class="glass-select">
-                <option value="all">الكل</option>
-            </select>
-        </div>
-        <div class="search-container">
             <label for="municipalitySelect" class="input-label">البلدية</label>
             <select id="municipalitySelect" class="glass-select">
                 <option value="all">الكل</option>
@@ -36,26 +30,69 @@
         <!-- Dynamic KPIs -->
         <div class="kpi-container">
             <div class="kpi-box box-total">
-                <h3>اجمالي المباني</h3>
+                <h3 style="display: flex; align-items: center; justify-content: center; gap: 5px; position: relative;">
+                    المستهدف
+                    <div class="custom-tooltip-wrapper" tabindex="0">
+                        <span class="tooltip-icon">!</span>
+                        <div class="tooltip-box">تمثل الحصر الشامل لكافة الكتل العمرانية والمضلعات المكانية
+                            الواقعة ضمن
+                            نطاق الشوارع المستهدفة بمشروع الأنسنة</div>
+                    </div>
+                </h3>
                 <p id="kpi-total">0</p>
             </div>
+            <div class="kpi-box box-total">
+                <h3 style="display: flex; align-items: center; justify-content: center; gap: 5px; position: relative;">
+                    إجمالي الشهادات الصادرة
+                    <div class="custom-tooltip-wrapper" tabindex="0">
+                        <span class="tooltip-icon">!</span>
+                        <div class="tooltip-box">تشمل كافة التراخيص الصادرة إدارياً بغض النظر عن دقة موقعها
+                            الجغرافي
+                        </div>
+                    </div>
+                </h3>
+                <p id="kpi-total-certs">14,480</p>
+            </div>
             <div class="kpi-box compliant">
-                <h3>ممتثل</h3>
+                <h3 style="display: flex; align-items: center; justify-content: center; gap: 5px; position: relative;">
+                    شهادات صادرة
+                    <div class="custom-tooltip-wrapper" tabindex="0">
+                        <span class="tooltip-icon">!</span>
+                        <div class="tooltip-box">الشهادات التي تم التحقق من مطابقتها الجغرافية فوق أسطح المباني
+                            بدقة
+                            عالية (إزاحة أقل من 3 أمتار)</div>
+                    </div>
+                </h3>
                 <p id="kpi-compliant">0</p>
             </div>
-            <div class="kpi-box compliant-buffer">
-                <h3>ممتثل (ضمن النطاق)</h3>
-                <p id="kpi-compliant-buffer">0</p>
-            </div>
-            <div class="kpi-box non-compliant box-total">
-                <h3>غير ممتثل</h3>
+
+            <div class="kpi-box non-compliant">
+                <h3 style="display: flex; align-items: center; justify-content: center; gap: 5px; position: relative;">
+                    شهادات غير صادرة
+                    <div class="custom-tooltip-wrapper" tabindex="0">
+                        <span class="tooltip-icon">!</span>
+                        <div class="tooltip-box">المباني التي لا تملك سجل امتثال مرتبط بها حالياً، وتعتبر
+                            الأولوية
+                            القصوى للمتابعة الميدانية</div>
+                    </div>
+                </h3>
                 <p id="kpi-noncompliant">0</p>
             </div>
         </div>
 
-        <!-- Gauge Chart -->
-        <div class="chart-container">
-            <h3 class="chart-title">نسبة الامتثال</h3>
+        <!-- Gauge Chart 1: Spatial Coverage -->
+        <div class="chart-container" style="flex: 1;">
+            <h3 class="chart-title"
+                style="display: flex; align-items: center; justify-content: center; gap: 5px; position: relative;">
+                نسبة التغطية المكانية للمباني
+                <div class="custom-tooltip-wrapper" tabindex="0">
+                    <span class="tooltip-icon">!</span>
+                    <div class="tooltip-box">تُحسب هذه النسبة بناءً على عدد الشهادات الصادرة التي تُطابق
+                        جغرافياً مواقع
+                        المباني بدقة عالية مقسومة على إجمالي عدد المباني المحصورة في نطاق الشوارع
+                        المستهدفة.</div>
+                </div>
+            </h3>
             <div class="canvas-wrapper">
                 <canvas id="gaugeChart"></canvas>
                 <div class="gauge-center">
@@ -69,11 +106,47 @@
             </div>
         </div>
 
+        <!-- Gap Analysis Card -->
+        <div class="gap-card glass" style="margin-top: 15px;">
+            <div class="gap-header" style="justify-content: center; gap: 8px;">
+                <h3 class="gap-title">المطابقة المكانية</h3>
+                <div class="custom-tooltip-wrapper" tabindex="0">
+                    <span class="tooltip-icon">!</span>
+                    <div class="tooltip-box">تشمل هذه القائمة الشهادات الصادرة التي تتطلب 'تصحيحاً مكانياً'.
+                        يعمل النظام
+                        حالياً على حصر هذه الحالات لضمان مطابقتها مع الخريطة، حيث تم تحديد جزء منها (بالمباني
+                        الصفراء)
+                        وجارٍ معالجة المتبقي لرفع دقة مؤشر الامتثال</div>
+                </div>
+            </div>
+            <div class="gap-rows">
+                <div class="gap-row gap-row-highlight"
+                    title="الشهادات المتبقية تحتوي على إحداثيات خاطئة (في الشارع، أو خارج النطاق) أو تمثل وحدات تجارية متعددة داخل نفس المبنى.">
+                    <span class="gap-label">الشهادات المتبقية (قيد التصحيح المكاني)</span>
+                    <span class="gap-value cert-gap" id="gap-diff">9,110</span>
+                </div>
+            </div>
+            <div class="gap-bar-wrap">
+                <div class="gap-bar-fill" id="gap-bar"></div>
+            </div>
+            <div class="gap-bar-labels">
+                <span>مربوط</span>
+                <span id="gap-pct">0%</span>
+                <span>فجوة</span>
+            </div>
+        </div>
+
         <!-- Legend -->
         <div class="legend">
-            <div class="legend-item"><span class="color-box compliant-bg"></span>مباني ممتثلة (تطابق دقيق)</div>
-            <div class="legend-item"><span class="color-box compliant-buffer-bg"></span>مباني ممتثلة (ضمن النطاق)</div>
-            <div class="legend-item"><span class="color-box non-compliant-bg"></span>مباني غير ممتثلة</div>
+            <div class="legend-item"><span class="color-box compliant-bg"></span>مباني: شهادات صادرة</div>
+            <div class="legend-item"><span class="color-box compliant-buffer-bg"></span>مباني: شهادات صادرة
+                (الموقع غير
+                دقيق)</div>
+            <div class="legend-item"><span class="color-box non-compliant-bg"></span>مباني: شهادات غير صادرة
+            </div>
+            <div class="legend-item interactive" data-filter="scattered"><span class="color-box"
+                    style="background-color: #fde047; border: 1px solid #ca8a04; border-radius: 50%;"></span>شهادات
+                صادرة (تحتاج معالجة)</div>
         </div>
 
         <button id="resetBtn" class="reset-btn glass">الغاء الفلتر والعودة للرؤية الشاملة</button>

@@ -5,25 +5,41 @@
  */
 class DataHandler {
     constructor() {
-        this.geoData = null;
+        this.geoData = null; // Buildings
+        this.pointsData = null; // Certificates
+        this.streetsList = new Set();
         this.streetsList = new Set();
         this.municipalityList = new Set();
-        this.globalStats = { total: 0, compliant: 0, compliantBuffer: 0, nonCompliant: 0 };
+        this.globalStats = { total: 0, compliant: 0, compliantBuffer: 0, nonCompliant: 0, totalCerts: 0, totalMatchedCerts: 0 };
     }
 
     /**
      * Fetch GeoJSON Data and store in Memory Cache
      * @param {string} url - GeoJSON file path
      */
-    async loadData(url) {
+    async loadData(url, pointsUrl) {
         try {
-            const response = await fetch(url);
-            this.geoData = await response.json();
+            const [bldgRes, ptsRes] = await Promise.all([
+                fetch(url),
+                pointsUrl ? fetch(pointsUrl) : Promise.resolve(null)
+            ]);
+
+            this.geoData = await bldgRes.json();
+            if (ptsRes) {
+                this.pointsData = await ptsRes.json();
+
+                // CRITICAL: Filter pointsData to only include those intersecting target roads
+                if (this.pointsData && this.pointsData.features) {
+                    this.pointsData.features = this.pointsData.features.filter(f =>
+                        f.properties && f.properties['التقاطع مع الطرق المستهدفة'] === true
+                    );
+                }
+            }
 
             // Generate clean street names and cache stats immediately (Worker-like efficiency)
             this.processInitialData();
 
-            return this.geoData;
+            return { buildings: this.geoData, points: this.pointsData };
         } catch (error) {
             console.error("Error loading GeoJSON data:", error);
             return null;
@@ -54,6 +70,7 @@ class DataHandler {
             muniName = (muniName && !['nan', 'None', 'NULL', 'null', '<Null>', ''].includes(String(muniName).trim()))
                 ? String(muniName).trim()
                 : 'غير محدد';
+            // Normalize spaces/arabic characters if needed, but trim is baseline
             feature.properties._clean_municipality = muniName;
             this.municipalityList.add(muniName);
 
@@ -72,6 +89,16 @@ class DataHandler {
                 this.globalStats.nonCompliant++;
             }
         });
+
+        // Calculate global certificates stats
+        if (this.pointsData && this.pointsData.features) {
+            this.globalStats.totalCerts = this.pointsData.features.length;
+            this.pointsData.features.forEach(f => {
+                if (f.properties && f.properties['التقاطع مع الطرق المستهدفة'] === true) {
+                    this.globalStats.totalMatchedCerts++;
+                }
+            });
+        }
     }
 
     /**
@@ -79,7 +106,7 @@ class DataHandler {
      */
     getStreetStats(streetName) {
         if (!streetName || streetName === 'all') return this.globalStats;
-        const stats = { total: 0, compliant: 0, compliantBuffer: 0, nonCompliant: 0 };
+        const stats = { total: 0, compliant: 0, compliantBuffer: 0, nonCompliant: 0, totalCerts: 0, totalMatchedCerts: 0 };
         this.geoData.features.forEach(feature => {
             if (feature.properties._clean_street === streetName) {
                 stats.total++;
@@ -88,12 +115,26 @@ class DataHandler {
                 else stats.nonCompliant++;
             }
         });
+
+        if (this.pointsData && this.pointsData.features) {
+            this.pointsData.features.forEach(feature => {
+                let pStreet = feature.properties['الشارع'] || feature.properties.Name;
+                pStreet = (pStreet && !['nan', 'None', 'NULL', 'null', '<Null>'].includes(String(pStreet).trim())) ? String(pStreet).trim() : 'غير محدد';
+                if (pStreet === streetName) {
+                    stats.totalCerts++;
+                    if (feature.properties['التقاطع مع الطرق المستهدفة'] === true || feature.properties.Matched === 1) {
+                        stats.totalMatchedCerts++;
+                    }
+                }
+            });
+        }
+
         return stats;
     }
 
     getMunicipalityStats(muniName) {
         if (!muniName || muniName === 'all') return this.globalStats;
-        const stats = { total: 0, compliant: 0, compliantBuffer: 0, nonCompliant: 0 };
+        const stats = { total: 0, compliant: 0, compliantBuffer: 0, nonCompliant: 0, totalCerts: 0, totalMatchedCerts: 0 };
         this.geoData.features.forEach(feature => {
             if (feature.properties._clean_municipality === muniName) {
                 stats.total++;
@@ -102,6 +143,20 @@ class DataHandler {
                 else stats.nonCompliant++;
             }
         });
+
+        if (this.pointsData && this.pointsData.features) {
+            this.pointsData.features.forEach(feature => {
+                let pMuni = feature.properties['البلدية'];
+                pMuni = (pMuni && !['nan', 'None', 'NULL', 'null', '<Null>', ''].includes(String(pMuni).trim())) ? String(pMuni).trim() : 'غير محدد';
+                if (pMuni === muniName) {
+                    stats.totalCerts++;
+                    if (feature.properties['التقاطع مع الطرق المستهدفة'] === true || feature.properties.Matched === 1) {
+                        stats.totalMatchedCerts++;
+                    }
+                }
+            });
+        }
+
         return stats;
     }
 
