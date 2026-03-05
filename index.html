@@ -1,0 +1,87 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>لوحة بيانات امتثال أبها</title>
+    <!-- MapLibre GL JS -->
+    <script src="https://unpkg.com/maplibre-gl@3.6.2/dist/maplibre-gl.js"></script>
+    <link href="https://unpkg.com/maplibre-gl@3.6.2/dist/maplibre-gl.css" rel="stylesheet" />
+    <!-- Chart.js for Gauge -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <!-- Custom CSS -->
+    <link rel="stylesheet" href="css/style.css">
+</head>
+
+<body>
+    <!-- Map Container -->
+    <div id="map"></div>
+    <!-- Glassmorphism Sidebar -->
+    <div class="sidebar glass">
+        <!-- Search / Select Dropdown directly at the top -->
+        <div class="search-container">
+            <label for="streetSelect" class="input-label">الشارع <span class="badge-dev">(قيد التطوير)</span></label>
+            <select id="streetSelect" class="glass-select">
+                <option value="all">الكل</option>
+            </select>
+        </div>
+        <div class="search-container">
+            <label for="municipalitySelect" class="input-label">البلدية</label>
+            <select id="municipalitySelect" class="glass-select">
+                <option value="all">الكل</option>
+            </select>
+        </div>
+
+        <!-- Dynamic KPIs -->
+        <div class="kpi-container">
+            <div class="kpi-box box-total">
+                <h3>اجمالي المباني</h3>
+                <p id="kpi-total">0</p>
+            </div>
+            <div class="kpi-box compliant">
+                <h3>ممتثل</h3>
+                <p id="kpi-compliant">0</p>
+            </div>
+            <div class="kpi-box compliant-buffer">
+                <h3>ممتثل (ضمن النطاق)</h3>
+                <p id="kpi-compliant-buffer">0</p>
+            </div>
+            <div class="kpi-box non-compliant box-total">
+                <h3>غير ممتثل</h3>
+                <p id="kpi-noncompliant">0</p>
+            </div>
+        </div>
+
+        <!-- Gauge Chart -->
+        <div class="chart-container">
+            <h3 class="chart-title">نسبة الامتثال</h3>
+            <div class="canvas-wrapper">
+                <canvas id="gaugeChart"></canvas>
+                <div class="gauge-center">
+                    <span id="gaugeValue">0%</span>
+                </div>
+            </div>
+            <div class="chart-legend-row">
+                <span class="legend-color legend-good">٧٥٪+ (ممتاز)</span>
+                <span class="legend-color legend-warn">٤٠-٧٥٪ (متوسط)</span>
+                <span class="legend-color legend-bad">&lt;٤٠٪ (ضعيف)</span>
+            </div>
+        </div>
+
+        <!-- Legend -->
+        <div class="legend">
+            <div class="legend-item"><span class="color-box compliant-bg"></span>مباني ممتثلة (تطابق دقيق)</div>
+            <div class="legend-item"><span class="color-box compliant-buffer-bg"></span>مباني ممتثلة (ضمن النطاق)</div>
+            <div class="legend-item"><span class="color-box non-compliant-bg"></span>مباني غير ممتثلة</div>
+        </div>
+
+        <button id="resetBtn" class="reset-btn glass">الغاء الفلتر والعودة للرؤية الشاملة</button>
+    </div>
+
+    <!-- Application Scripts (Separation of Concerns) -->
+    <script src="js/data-handler.js"></script>
+    <script src="js/map-engine.js"></script>
+</body>
+
+</html>
