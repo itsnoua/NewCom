@@ -387,3 +387,172 @@ body {
 .popup-link:hover {
     background: rgba(0, 255, 65, 0.1);
 }
+
+/* ======== Gap Analysis Card ======== */
+.gap-card {
+    background: rgba(0, 0, 0, 0.45);
+    border: 1px solid rgba(255, 165, 0, 0.25);
+    border-radius: 12px;
+    padding: 16px;
+}
+
+.gap-header {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin-bottom: 14px;
+}
+
+.gap-icon {
+    font-size: 18px;
+}
+
+.gap-title {
+    font-size: 15px;
+    font-weight: 700;
+    color: var(--text-main);
+    margin: 0;
+}
+
+.gap-rows {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    margin-bottom: 14px;
+}
+
+.gap-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.gap-row-highlight {
+    background: rgba(255, 49, 49, 0.08);
+    border-radius: 6px;
+    padding: 6px 8px;
+    margin: 0 -8px;
+}
+
+.gap-label {
+    font-size: 13px;
+    color: var(--text-muted);
+}
+
+.gap-value {
+    font-size: 18px;
+    font-weight: 700;
+    font-variant-numeric: tabular-nums;
+}
+
+.cert-total {
+    color: #60a5fa;
+    text-shadow: 0 0 10px rgba(96, 165, 250, 0.4);
+}
+
+.cert-matched {
+    color: var(--neon-green);
+    text-shadow: 0 0 10px rgba(0, 255, 65, 0.3);
+}
+
+.cert-gap {
+    color: var(--deep-red);
+    text-shadow: 0 0 10px rgba(255, 49, 49, 0.4);
+}
+
+.gap-divider {
+    height: 1px;
+    background: var(--glass-border);
+    margin: 2px 0;
+}
+
+/* Progress Bar */
+.gap-bar-wrap {
+    position: relative;
+    height: 8px;
+    background: rgba(255, 49, 49, 0.3);
+    border-radius: 99px;
+    overflow: hidden;
+    margin-bottom: 6px;
+}
+
+.gap-bar-fill {
+    height: 100%;
+    background: linear-gradient(90deg, var(--neon-green), #22d3ee);
+    border-radius: 99px;
+    width: 0%;
+    transition: width 1s ease;
+    box-shadow: 0 0 8px rgba(0, 255, 65, 0.5);
+}
+
+.gap-bar-labels {
+    display: flex;
+    justify-content: space-between;
+    font-size: 11px;
+    color: var(--text-muted);
+}
+
+/* Custom Interactive Tooltip */
+.custom-tooltip-wrapper {
+    position: relative;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    outline: none;
+    cursor: pointer;
+}
+
+.tooltip-icon {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 14px;
+    height: 14px;
+    border-radius: 50%;
+    background: rgba(255, 255, 255, 0.2);
+    border: 1px solid rgba(255, 255, 255, 0.4);
+    font-size: 10px;
+    color: white;
+}
+
+.tooltip-box {
+    visibility: hidden;
+    opacity: 0;
+    position: absolute;
+    top: 150%;
+    left: 50%;
+    transform: translateX(-50%);
+    background: rgba(0, 0, 0, 0.9);
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.5);
+    color: #fff;
+    text-align: center;
+    border-radius: 6px;
+    padding: 8px 12px;
+    width: max-content;
+    max-width: 200px;
+    font-size: 11px;
+    line-height: 1.5;
+    z-index: 1000;
+    transition: opacity 0.2s, visibility 0.2s;
+    pointer-events: none;
+}
+
+.tooltip-box::after {
+    content: "";
+    position: absolute;
+    bottom: 100%;
+    left: 50%;
+    margin-left: -5px;
+    border-width: 5px;
+    border-style: solid;
+    border-color: transparent transparent rgba(0, 0, 0, 0.9) transparent;
+}
+
+/* Show on hover or when clicked/focused */
+.custom-tooltip-wrapper:hover .tooltip-box,
+.custom-tooltip-wrapper:focus .tooltip-box,
+.custom-tooltip-wrapper:active .tooltip-box {
+    visibility: visible;
+    opacity: 1;
+}
